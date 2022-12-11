@@ -1,0 +1,8 @@
+cd C:/Users/Benjamin/Documents/Flatcam/PostProcessors
+
+proc call_python {} {
+    set output [exec python RolandPostPrcVer1.py]
+    puts $output
+}
+
+call_python

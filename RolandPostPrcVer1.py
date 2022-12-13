@@ -30,7 +30,8 @@ for i in allLines:
     #Remove tool change command T
     if i[0] == 'T':
         doWrite=False
-        
+
+    #Remove tool change command M06
     if i == "M6\n":
         doWrite=False
 
@@ -40,12 +41,14 @@ for i in allLines:
 
     if i == "M0\n":
         doWrite=False
-        newFile.write("M00\n")
+        newFile.write("!NR\n")
         goToWorkZ=True #Go to Z2mm after stop
 
     if doWrite==True:
         newFile.write(i)
 
+newFile.write("G00 Z15.0000\n") #Go to Z15mm
+newFile.write("G00 X0.0000 Y0.0000\n") #Go to home
 newFile.write("M02\n") #Program end
 newFile.write("%\n") #Data end
 

@@ -16,9 +16,34 @@ newFile=open("tempFile","w")
 newFile.write("%\n") #Data start
 newFile.write("(Roland nc Post Processor Ver1 - By Benjamin Solar)\n\n")
 
+goToWorkZ=False #Go to work z flag
+
 for i in allLines:
+    doWrite=True #Regular write flag
+
+    #Go to Z2mm
+    if goToWorkZ==True:
+        goToWorkZ=False
+        doWrite=False
+        newFile.write("G00 Z2.0000\n")
+    
     #Remove tool change command T
-    if i[0] != 'T':
+    if i[0] == 'T':
+        doWrite=False
+        
+    if i == "M6\n":
+        doWrite=False
+
+    if i == "M5\n":
+        doWrite=False
+        newFile.write("M05\n")
+
+    if i == "M0\n":
+        doWrite=False
+        newFile.write("M00\n")
+        goToWorkZ=True #Go to Z2mm after stop
+
+    if doWrite==True:
         newFile.write(i)
 
 newFile.write("M02\n") #Program end

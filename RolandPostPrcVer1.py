@@ -11,25 +11,34 @@ oldFileAdr=askopenfilename()
 
 oldFile=open(oldFileAdr,"r")
 allLines=oldFile.readlines()
-newFile=open("tempFile","w")
+newFile=open("TempFile.nc","w")
+
+def insertToolChange():
+    newFile.write("(Tool Change)\n")
+    newFile.write("G00 X0.0000 Y0.0000\n")
+    newFile.write("!NR;\n") #Wait for change of tool
+    newFile.write("G00 Z0.0000\n") #Go to Z0 for zeroing of tool
+    newFile.write("!NR;\n") #Wait
+    newFile.write("G00 Z15.0000\n") #Go back to Z15
 
 newFile.write("%\n") #Data start
 newFile.write("(Roland nc Post Processor Ver1 - By Benjamin Solar)\n\n")
 
-goToWorkZ=False #Go to work z flag
+skipNext=0 #Go to work z flag
 
 for i in allLines:
     doWrite=True #Regular write flag
 
-    #Go to Z2mm
-    if goToWorkZ==True:
-        goToWorkZ=False
+    #Replace next line
+    if skipNext > 0:
+        skipNext-=1
         doWrite=False
-        newFile.write("G00 Z2.0000\n")
     
     #Remove tool change command T
     if i[0] == 'T':
         doWrite=False
+        skipNext+=5
+        
 
     #Remove tool change command M06
     if i == "M6\n":
@@ -41,8 +50,7 @@ for i in allLines:
 
     if i == "M0\n":
         doWrite=False
-        newFile.write("!NR\n")
-        goToWorkZ=True #Go to Z2mm after stop
+        newFile.write("!NR;\n")
 
     if doWrite==True:
         newFile.write(i)
@@ -56,7 +64,7 @@ newFile.close()
 oldFile.close()
 
 #Replace 
-os.replace("tempFile",oldFileAdr)
+#os.replace("TempFile",oldFileAdr)
 
 print("Finished!")
 print("Location: " + oldFileAdr)

@@ -13,18 +13,10 @@ oldFile=open(oldFileAdr,"r")
 allLines=oldFile.readlines()
 newFile=open("TempFile.nc","w")
 
-def insertToolChange():
-    newFile.write("(Tool Change)\n")
-    newFile.write("G00 X0.0000 Y0.0000\n")
-    newFile.write("!NR;\n") #Wait for change of tool
-    newFile.write("G00 Z0.0000\n") #Go to Z0 for zeroing of tool
-    newFile.write("!NR;\n") #Wait
-    newFile.write("G00 Z15.0000\n") #Go back to Z15
-
 newFile.write("%\n") #Data start
 newFile.write("(Roland nc Post Processor Ver1 - By Benjamin Solar)\n\n")
 
-skipNext=0 #Go to work z flag
+skipNext=0
 
 for i in allLines:
     doWrite=True #Regular write flag
@@ -33,24 +25,22 @@ for i in allLines:
     if skipNext > 0:
         skipNext-=1
         doWrite=False
-    
-    #Remove tool change command T
-    if i[0] == 'T':
-        doWrite=False
-        skipNext+=5
-        
+    else:
+        #Remove tool change command T
+        if i[0] == 'T':
+            doWrite=False
 
-    #Remove tool change command M06
-    if i == "M6\n":
-        doWrite=False
+        #Remove tool change command M06
+        if i == "M6\n":
+            doWrite=False
 
-    if i == "M5\n":
-        doWrite=False
-        newFile.write("M05\n")
+        if i == "M5\n":
+            doWrite=False
+            newFile.write("M05\n")
 
-    if i == "M0\n":
-        doWrite=False
-        newFile.write("!NR;\n")
+        if i == "M0\n":
+            doWrite=False
+            newFile.write("M00\n")
 
     if doWrite==True:
         newFile.write(i)
@@ -64,7 +54,7 @@ newFile.close()
 oldFile.close()
 
 #Replace 
-#os.replace("TempFile",oldFileAdr)
+os.replace("TempFile.nc",oldFileAdr)
 
 print("Finished!")
 print("Location: " + oldFileAdr)
